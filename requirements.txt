@@ -1,0 +1,6 @@
+Flask
+Flask-Cors
+Flask-Session
+python-dotenv
+google-genai
+requests

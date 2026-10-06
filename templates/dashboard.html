@@ -1,0 +1,354 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | PromptShield{% endblock %}
+
+{% block content %}
+<div class="workspace">
+    <!-- Sidebar -->
+    <aside class="sidebar" style="position: fixed; width: 242px; height: 100vh; padding: 24px; display: flex; flex-direction: column;">
+        <div class="brand">
+            <span class="brand-icon">
+                <i data-lucide="shield-check" style="color: white; width: 20px; height: 20px;"></i>
+            </span>
+            <span style="font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 18px; margin-left: 10px;">Prompt<span style="color: var(--ps-green);">Shield</span></span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <button class="nav-item" data-view="scanner">
+                <i data-lucide="scan"></i> Scanner
+            </button>
+            <button class="nav-item" data-view="assessment">
+                <i data-lucide="file-check-2"></i> Assessment
+            </button>
+            <button class="nav-item" data-view="optimization">
+                <i data-lucide="wand-2"></i> Optimizer
+            </button>
+            <button class="nav-item" data-view="history">
+                <i data-lucide="history"></i> History
+            </button>
+            <button class="nav-item" data-view="overview">
+                <i data-lucide="pie-chart"></i> Overview
+            </button>
+            <a class="nav-item" href="/" style="text-decoration: none; margin-top: auto;">
+                <i data-lucide="log-out"></i> Exit
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-security-card">
+                <div class="sidebar-security-icon"><i data-lucide="lock"></i></div>
+                <strong>Secure Environment</strong>
+                <p>All prompt data is encrypted and analyzed safely.</p>
+            </div>
+            <div class="system-status">
+                <span class="status-dot connected"></span>
+                <span id="system-status">Backend connected</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="workspace-main">
+        <header class="topbar" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 35px;">
+            <div class="breadcrumb" style="font-weight: 600; color: var(--ps-muted);">
+                Dashboard / <span id="breadcrumb-current" style="color: var(--ps-text);">Prompt Scanner</span>
+            </div>
+            <div class="topbar-right" style="display: flex; align-items: center; gap: 15px;">
+                <span class="environment-badge"><span class="status-dot"></span> Production</span>
+                <div class="topbar-avatar">PS</div>
+            </div>
+        </header>
+
+        <div class="page-content">
+            <div class="workflow-overview">
+                <div class="workflow-card">
+                    <span class="workflow-number">01</span>
+                    <div><strong>Prompt Scanner</strong><p>Inspect prompt instructions for known attack patterns.</p></div>
+                </div>
+                <div class="workflow-card">
+                    <span class="workflow-number">02</span>
+                    <div><strong>Security Assessment</strong><p>Review risk, confidence, evidence, and explanations.</p></div>
+                </div>
+                <div class="workflow-card">
+                    <span class="workflow-number">03</span>
+                    <div><strong>Prompt Optimizer</strong><p>Create a safer version while preserving intent.</p></div>
+                </div>
+            </div>
+
+            <!-- SCANNER VIEW -->
+            <div id="scanner-view" class="view active-view">
+                <div class="welcome-row">
+                    <div>
+                        <div class="eyebrow"><span class="status-dot"></span> PROMPT SCANNER</div>
+                        <h1>Analyze your <span class="heading-accent">Prompts</span></h1>
+                        <p>Submit your AI prompts below to scan for security threats, jailbreaks, and sensitive data leakage.</p>
+                    </div>
+                    <div class="hero-object-wrap">
+                        <div class="hero-object">
+                            <div class="hero-object-inner"><i data-lucide="shield"></i></div>
+                        </div>
+                        <div class="hero-object-orbit orbit-a"></div>
+                        <div class="hero-object-orbit orbit-b"></div>
+                        <div class="orbit-label orbit-label-one">SECURE</div>
+                        <div class="orbit-label orbit-label-two">AI</div>
+                    </div>
+                </div>
+
+                <div class="scanner-layout" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <div class="panel scanner-panel">
+                        <div class="panel-heading" style="display: flex; gap: 15px;">
+                            <div class="panel-icon"><i data-lucide="terminal"></i></div>
+                            <div>
+                                <h2>Input Prompt</h2>
+                                <p>Paste the prompt you want to test</p>
+                            </div>
+                        </div>
+
+                        <div class="sample-heading">
+                            <span>TRY A SAMPLE</span>
+                            <span class="sample-hint">Click to load</span>
+                        </div>
+                        <div class="sample-buttons">
+                            <button class="sample-btn" data-sample="safe"><i data-lucide="check"></i> Safe</button>
+                            <button class="sample-btn" data-sample="injection"><i data-lucide="alert-circle"></i> Injection</button>
+                            <button class="sample-btn" data-sample="leakage"><i data-lucide="eye"></i> Leakage</button>
+                        </div>
+
+                        <label class="field-label">PROMPT TEXT</label>
+                        <div class="textarea-wrap">
+                            <textarea id="prompt-input" placeholder="Enter your prompt here..."></textarea>
+                            <div class="textarea-footer">
+                                <div class="input-security-note"><i data-lucide="lock"></i> Encrypted in transit</div>
+                                <span id="character-count">0 / 10000</span>
+                            </div>
+                        </div>
+
+                        <div class="scanner-actions">
+                            <button id="clear-prompt" class="btn-secondary"><i data-lucide="trash-2"></i> Clear</button>
+                            <button id="scan-button" class="btn-primary"><i data-lucide="scan-line"></i> Analyze Prompt</button>
+                        </div>
+                    </div>
+
+                    <div class="panel results-panel">
+                        <div class="panel-heading" style="display: flex; gap: 15px;">
+                            <div class="panel-icon"><i data-lucide="file-search"></i></div>
+                            <div style="flex-grow: 1;">
+                                <h2>Scan Results</h2>
+                                <p>Analysis and threat breakdown</p>
+                            </div>
+                            <span id="result-tag" class="result-tag">WAITING</span>
+                        </div>
+
+                        <div id="empty-state" class="empty-state">
+                            <div class="empty-visual">
+                                <div class="empty-orbit"></div>
+                                <div class="empty-shield"><i data-lucide="shield-off"></i></div>
+                            </div>
+                            <h3>No Analysis Yet</h3>
+                            <p>Submit a prompt on the left to see the security assessment and risk scoring.</p>
+                        </div>
+
+                        <div id="results-content" class="results-content hidden">
+                            <div class="risk-overview">
+                                <div class="score-gauge">
+                                    <svg viewBox="0 0 150 150">
+                                        <circle class="gauge-track" cx="75" cy="75" r="66" fill="none" stroke-width="12"></circle>
+                                        <circle id="gauge-progress" class="gauge-progress" cx="75" cy="75" r="66" fill="none" stroke-width="12" stroke-linecap="round"></circle>
+                                    </svg>
+                                    <div class="gauge-label">
+                                        <strong id="security-score">—</strong>
+                                        <span>SCORE</span>
+                                    </div>
+                                </div>
+                                <div class="risk-copy">
+                                    <span id="risk-badge" class="risk-pill">Not analyzed</span>
+                                    <h3 id="risk-title">Awaiting analysis</h3>
+                                    <p id="risk-summary">No score until a prompt is analyzed.</p>
+                                    <div class="threat-type-line">
+                                        <span>PRIMARY THREAT</span>
+                                        <strong id="threat-type">None</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="analysis-divider"></div>
+
+                            <div class="signal-metrics">
+                                <div class="signal-metric">
+                                    <div class="metric-top">
+                                        <span>Rule-based Analysis</span>
+                                        <strong id="rule-score-value">0/100</strong>
+                                    </div>
+                                    <div class="metric-track">
+                                        <div id="rule-bar" class="metric-fill rule-fill"></div>
+                                    </div>
+                                </div>
+                                <div class="signal-metric">
+                                    <div class="metric-top">
+                                        <span>AI Confidence</span>
+                                        <strong id="llm-score-value">0%</strong>
+                                    </div>
+                                    <div class="metric-track">
+                                        <div id="llm-bar" class="metric-fill llm-fill"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="explanation-box">
+                                <div class="explanation-heading"><i data-lucide="info"></i> Explanation</div>
+                                <p id="explanation-text">No explanation provided.</p>
+                            </div>
+
+                            <div id="signal-list" class="signal-list"></div>
+
+                            <div id="optimization-block" class="optimization-block hidden">
+                                <div class="optimization-heading">
+                                    <div class="optimization-icon"><i data-lucide="wand-2"></i></div>
+                                    <div>
+                                        <h3>Suggested Optimization</h3>
+                                        <p>A safer version of your prompt</p>
+                                    </div>
+                                </div>
+                                <textarea id="optimized-prompt" readonly></textarea>
+                                <div class="optimization-actions">
+                                    <button id="copy-optimized" class="btn-secondary"><i data-lucide="copy"></i> Copy</button>
+                                    <button id="use-optimized" class="btn-primary"><i data-lucide="arrow-left"></i> Use Prompt</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel recent-panel" style="margin-top: 24px;">
+                    <div class="panel-heading">
+                        <h2>Recent Scans</h2>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Prompt</th>
+                                    <th>Threat Type</th>
+                                    <th>Score</th>
+                                    <th>Risk</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-table-body">
+                                <tr><td colspan="5" class="table-empty">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ASSESSMENT VIEW -->
+            <div id="assessment-view" class="view hidden">
+                <div class="page-heading">
+                    <div class="eyebrow"><span class="status-dot"></span> SECURITY ASSESSMENT</div>
+                    <h1>Review the <span class="heading-accent">risk report</span></h1>
+                    <p>Understand the security score, primary threat, confidence, supporting evidence, and recommended action.</p>
+                </div>
+                <div class="assessment-layout">
+                    <div class="panel assessment-input-panel">
+                        <div class="panel-heading"><div class="panel-icon"><i data-lucide="file-check-2"></i></div><div><h2>Assessment prompt</h2><p>Choose a prompt from your scanner or paste it here.</p></div></div>
+                        <textarea id="assessment-prompt" class="assessment-textarea" placeholder="Paste the prompt you want to assess..."></textarea>
+                        <button id="assess-button" class="btn-primary">Generate assessment</button>
+                    </div>
+                    <div class="panel assessment-result-panel">
+                        <div class="panel-heading"><div class="panel-icon"><i data-lucide="shield-check"></i></div><div><h2>Assessment report</h2><p>Detailed findings will appear here.</p></div></div>
+                        <div id="assessment-empty" class="assessment-empty"><i data-lucide="file-question"></i><h3>No assessment yet</h3><p>Submit a prompt to review the evidence behind its risk rating.</p></div>
+                        <div id="assessment-results" class="assessment-results hidden"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OPTIMIZATION VIEW -->
+            <div id="optimization-view" class="view hidden">
+                <div class="page-heading">
+                    <div class="eyebrow"><span class="status-dot"></span> PROMPT OPTIMIZER</div>
+                    <h1>Build a <span class="heading-accent">safer prompt</span></h1>
+                    <p>Generate a safer rewrite while preserving the original prompt's legitimate objective.</p>
+                </div>
+                <div class="optimization-workspace">
+                    <div class="panel optimization-input-panel">
+                        <div class="panel-heading"><div class="panel-icon"><i data-lucide="wand-2"></i></div><div><h2>Original prompt</h2><p>Paste the prompt you want to improve.</p></div></div>
+                        <textarea id="optimization-prompt" class="assessment-textarea" placeholder="Paste the prompt to optimize..."></textarea>
+                        <button id="optimize-button" class="btn-primary">Create safer version</button>
+                    </div>
+                    <div class="panel optimization-output-panel">
+                        <div class="panel-heading"><div class="panel-icon"><i data-lucide="sparkles"></i></div><div><h2>Optimized prompt</h2><p>Review every change before using it.</p></div></div>
+                        <div id="optimization-empty" class="assessment-empty"><i data-lucide="wand-sparkles"></i><h3>No optimized prompt yet</h3><p>The safer rewrite will appear here after analysis.</p></div>
+                        <div id="optimization-results" class="optimization-results hidden"><textarea id="optimization-output" readonly></textarea><button id="copy-optimized" class="btn-secondary">Copy prompt</button></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HISTORY VIEW -->
+            <div id="history-view" class="view hidden">
+                <div class="page-heading">
+                    <h1>Scan <span class="heading-accent">History</span></h1>
+                    <p>Review all past prompt assessments and their detailed security breakdowns.</p>
+                </div>
+                
+                <div class="panel history-panel">
+                    <div class="history-toolbar">
+                        <div>
+                            <h2>Assessment Log</h2>
+                            <p id="history-count">0 saved assessments</p>
+                        </div>
+                        <div style="display: flex; gap: 12px;">
+                            <div class="search-field">
+                                <i data-lucide="search"></i>
+                                <input type="text" id="history-search" placeholder="Search prompts, threats...">
+                            </div>
+                            <button id="refresh-history" class="btn-secondary"><i data-lucide="refresh-cw"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Prompt</th>
+                                    <th>Threat Type</th>
+                                    <th>Score</th>
+                                    <th>Risk</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body">
+                                <tr><td colspan="6" class="table-empty">Loading history...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OVERVIEW VIEW -->
+            <div id="overview-view" class="view hidden">
+                <div class="page-heading">
+                    <h1>Security <span class="heading-accent">Overview</span></h1>
+                    <p>High-level insights into your prompt security patterns.</p>
+                </div>
+
+                <div class="panel distribution-panel" style="margin-top: 24px;">
+                    <div class="panel-heading" style="display: flex; gap: 10px; align-items: center;">
+                        <i data-lucide="bar-chart-2" class="panel-heading-icon"></i>
+                        <h2>Risk Distribution</h2>
+                    </div>
+                    <div id="risk-distribution" class="risk-distribution">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <footer class="page-footer" style="margin-top: 40px; border-top: 1px solid var(--ps-border); padding-top: 20px;">
+                <span>PromptShield Dashboard</span>
+                <span>Powered by AI Analysis</span>
+            </footer>
+        </div>
+    </main>
+</div>
+{% endblock %}
